@@ -1,23 +1,16 @@
-import re
+import torch
 
-class AceTokenizer:
-    def __init__(self):
-        self.vocab = {}
-        self.reverse_vocab = {}
+# Simple whitespace tokenizer as placeholder
+vocab = {word: i+1 for i, word in enumerate("this is a basic tokenizer example".split())}
+vocab["[PAD]"] = 0
+reverse_vocab = {i: word for word, i in vocab.items()}
 
-    def build_vocab(self, texts):
-        tokens = set()
-        for text in texts:
-            tokens.update(self.tokenize(text))
-        self.vocab = {token: idx for idx, token in enumerate(sorted(tokens))}
-        self.reverse_vocab = {idx: token for token, idx in self.vocab.items()}
+def tokenize_input(text, seq_len=128):
+    tokens = text.lower().split()
+    ids = [vocab.get(t, 0) for t in tokens]
+    padded = ids + [0] * (seq_len - len(ids))
+    return torch.tensor([padded])
 
-    def tokenize(self, text):
-        return re.findall(r"\b\w+\b", text.lower())
-
-    def encode(self, text):
-        tokens = self.tokenize(text)
-        return [self.vocab.get(token, 0) for token in tokens]
-
-    def decode(self, ids):
-        return " ".join([self.reverse_vocab.get(i, "<UNK>") for i in ids])
+def decode_output(token_ids):
+    decoded = [reverse_vocab.get(i.item(), "") for i in token_ids[0]]
+    return " ".join(decoded).strip()

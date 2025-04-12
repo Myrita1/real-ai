@@ -1,41 +1,26 @@
 import streamlit as st
 import torch
-from tokenizer import encode, decode
 from model import AceAssistantModel
+from tokenizer import tokenize_input, decode_output
 
-# Set Streamlit page config
 st.set_page_config(page_title="Ace Assistant LLM", layout="centered")
-st.title("🤖 Ace Assistant Language Model")
-st.markdown("Welcome! Enter a prompt and see how the model responds.")
 
-# Load model
-@st.cache_resource
-def load_model():
-    model = AceAssistantModel()
-    model.load_state_dict(torch.load("ace_model.pth", map_location=torch.device("cpu")))
-    model.eval()
-    return model
+st.title("🧠 Ace Assistant Language Model")
+st.write("Interact with your lightweight transformer model.")
 
-model = load_model()
+user_input = st.text_area("Enter your prompt:", height=150)
 
-# User input
-prompt = st.text_area("🗣️ Your Prompt", height=150)
-
-# Generate response
-if st.button("Generate Response"):
-    if not prompt.strip():
-        st.warning("Please enter a prompt to get a response.")
+if st.button("Generate"):
+    if user_input.strip() == "":
+        st.warning("Please enter some text.")
     else:
-        try:
-            # Encode input
-            input_ids = torch.tensor([encode(prompt)])
-            with torch.no_grad():
-                output = model(input_ids)
-                predicted_ids = torch.argmax(output, dim=-1)[0]
-                response = decode(predicted_ids.tolist())
-
-            st.subheader("📝 Model Response")
-            st.write(response)
-
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+        input_ids = tokenize_input(user_input)
+        model = AceAssistantModel()
+        model.load_state_dict(torch.load("model.pt", map_location=torch.device("cpu")))
+        model.eval()
+        with torch.no_grad():
+            output = model(input_ids)
+            predicted_ids = output.argmax(dim=-1)
+        result = decode_output(predicted_ids)
+        st.success("Generated Output:")
+        st.write(result)
