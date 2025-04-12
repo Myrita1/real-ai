@@ -1,10 +1,9 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.2.1+cpu
 torchvision==0.17.1+cpu
 torchaudio==2.2.1+cpu
---extra-index-url https://download.pytorch.org/whl/cpu
-
-transformers
-scikit-learn
-pandas
+transformers==4.37.2
+scikit-learn==1.4.1
+pandas==1.5.3
 numpy==1.24.4
-streamlit
+streamlit==1.25.0
